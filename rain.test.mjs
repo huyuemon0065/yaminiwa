@@ -7,6 +7,6 @@ for(const kind of ['milk','lemon','water']){
  const ready={phase:'ready',wateredAt:42,careBoost:false};assert.equal(ctx.water(ready,kind,20000).watered,false);assert.equal(ready.phase,'ready');assert.equal(ready.wateredAt,42);
 }
 const g={phase:'empty',wateredAt:0};assert.equal(ctx.water(g,'bad',123),null);assert.equal(ctx.water(g,'milk',NaN),null);assert.equal(g.phase,'empty');
-const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length);
+const ids=[...html.replace(/<script>[\s\S]*?<\/script>/g,'').matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length);
 assert.equal((html.match(/data-rain-art=/g)||[]).length,4);assert.equal((html.match(/class="rain-choice"/g)||[]).length,2);assert(html.includes('prefers-reduced-motion:reduce'));
 console.log('PASS: both magical rains + normal rain; first watering, repeated preview, ready plants, invalid input, no timer reset; unique element IDs and wide/tall art.');

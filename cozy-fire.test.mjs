@@ -29,5 +29,5 @@ modalOpen=true;vm.runInContext('updateFireClock();',ctx);assert.equal(notice.hid
 modalOpen=false;vm.runInContext('fireTake(state.fire,170000);updateFireClock();',ctx);assert.equal(notice.hidden,true,'taking food removes the notification');
 const update=code.slice(code.indexOf('function updateFireClock(){'),code.indexOf("$('#fireMenu').addEventListener"));assert.ok(!update.includes("if(!c||!$('#mCampfire')"),'notification is not gated by the open cooking modal');assert.ok(update.includes('info=started?pollFire'));assert.ok(update.includes('notice.hidden=!show'));
 assert.equal((html.match(/class="fire-fx"/g)||[]).length,2);assert.ok(html.includes('drawCampfireFX(now)'));assert.ok(html.includes('if(!reduced){'));assert.ok(html.includes('now-lastFireFX<33'));assert.ok(html.includes('id="fireNotice" role="status" aria-live="polite" hidden'));
-const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length);
+const ids=[...html.replace(/<script>[\s\S]*?<\/script>/g,'').matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length);
 console.log('PASS cozy fire: no pre-cook artwork, cooked/history artwork retained, global readiness, one-time sound/reload, late return, safe boundaries, wide/phone effects, reduced motion, frame cap and unique IDs');

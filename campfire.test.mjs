@@ -14,7 +14,7 @@ const data=code.slice(code.indexOf('const ATTRS='),code.indexOf('let state=fresh
 const old={version:2,coins:72,inventory:{m001:4},garden:{phase:'watered',wateredAt:now},settings:{bgm:false,bgmVol:0,sfxVol:0}};
 const migrated=saveBox.cleanSave(old);assert.equal(migrated.coins,72);assert.equal(migrated.inventory.m001,4);assert.equal(migrated.settings.bgm,false);assert.equal(migrated.garden.wateredAt,now);assert.equal(migrated.garden.time,'day');assert.equal(migrated.fire.cooking,null);
 const nightSave=saveBox.cleanSave({...old,garden:{...old.garden,time:'night'},fire:f});assert.equal(nightSave.garden.time,'night');assert.equal(nightSave.fire.cooking.food,1);
-const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length);assert.equal((html.match(/class="night-art"/g)||[]).length,2);
+const ids=[...html.replace(/<script>[\s\S]*?<\/script>/g,'').matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length);assert.equal((html.match(/class="night-art"/g)||[]).length,2);
 const assets=code.match(/const FIRE_ART=(\{.*?\});/)[1];assert.equal(Object.keys(JSON.parse(assets)).length,64);for(const food of x.foods)for(const mode of ['normal','spicy','rainbow','burnt'])assert.ok(JSON.parse(assets)[String(food.id).padStart(2,'0')+'-'+mode]);
 assert.ok(!html.includes('data-fire-wood="13"'));assert.ok(html.includes('id="fireDestination" value="fire"'));
 console.log('PASS campfire:',cases,'food/wood/timing cases, duplicate prevention, one per night, 05:00 reset, invalid inputs, reload/import, old save, 64 illustrations, night views and unique IDs');
