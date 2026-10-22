@@ -2,7 +2,7 @@ import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:asser
 const html=fs.readFileSync(new URL('./index.html',import.meta.url),'utf8'),code=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][1][1];
 new vm.Script(code);
 const engine=code.slice(code.indexOf('const FIRE_FOODS='),code.indexOf('/* END FIRE ENGINE */'));
-const ctx={};vm.createContext(ctx);vm.runInContext(engine+';Object.assign(this,{make:newFire,act:fireActivity,clean:cleanFire,start:fireStart,poll:pollFire,take:fireTake,night:fireNight,drinks:FIRE_DRINKS,stories:FIRE_STORIES,instruments:FIRE_INSTRUMENTS});',ctx);
+const ctx={guideAction(){}};vm.createContext(ctx);vm.runInContext(engine+';Object.assign(this,{make:newFire,act:fireActivity,clean:cleanFire,start:fireStart,poll:pollFire,take:fireTake,night:fireNight,drinks:FIRE_DRINKS,stories:FIRE_STORIES,instruments:FIRE_INSTRUMENTS});',ctx);
 assert.equal(ctx.drinks.b.length,13);assert.equal(ctx.drinks.m.length,3);assert.equal(ctx.drinks.t.length,6);assert.equal(ctx.stories.length,6);assert.equal(ctx.instruments.length,6);
 const now=Date.UTC(2026,9,22,13),f=ctx.make(),recipe={base:12,method:2,topping:5};
 assert.equal(ctx.act(f,'drink',recipe,now,false).ok,false);assert.equal(f.activities.drink.last,null);

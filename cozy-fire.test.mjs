@@ -1,7 +1,7 @@
 import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
 const html=fs.readFileSync(new URL('./index.html',import.meta.url),'utf8'),code=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][1][1];
 const a=code.indexOf('const FIRE_FOODS='),b=code.indexOf('/* END FIRE ENGINE */',a);
-const ctx={};vm.createContext(ctx);vm.runInContext(code.slice(a,b)+';Object.assign(this,{make:newFire,start:fireStart,poll:pollFire,take:fireTake,clean:cleanFire});',ctx);
+const ctx={guideAction(){}};vm.createContext(ctx);vm.runInContext(code.slice(a,b)+';Object.assign(this,{make:newFire,start:fireStart,poll:pollFire,take:fireTake,clean:cleanFire});',ctx);
 const now=Date.UTC(2026,9,22,12),f=ctx.make();ctx.start(f,1,'normal',now,true);
 assert.equal(ctx.poll(f,now+59999).notify,false);assert.equal(ctx.poll(f,now+60000).notify,true);assert.equal(ctx.poll(f,now+61000).notify,false);assert.equal(ctx.clean(f).cooking.notified,true);assert.equal(ctx.poll(ctx.clean(f),now+90000).notify,false,'reload does not repeat ready sound');
 assert.equal(ctx.poll(f,now+180000).phase,'ready');assert.equal(ctx.poll(f,now+180001).phase,'burnt');assert.equal(ctx.poll(f,NaN),null);assert.equal(ctx.poll(f,now-1),null);

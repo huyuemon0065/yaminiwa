@@ -34,3 +34,11 @@ YAGPDB版で利用中のユーザー提供画像を再利用しています。�
 
 ## ファンタジー操作盤（v1.5.0）
 ユーザー承認済みのデザイン画像を参考に、OpenAI画像生成で金細工の植物模様・エメラルド・中央魔法陣を持つ透過フレームを制作。制作プロンプト：横長の下部操作盤のみを抽出し、文字・アイコン・背景を除去、深緑エナメルと繊細な金の葉飾りを保持、透過背景。イラストは操作盤の装飾として使用し、文字・操作はHTML、アイコンは彩色SVGで実装。
+
+
+## 案内枠と書体（v1.6.0）
+案内枠はユーザー承認の画像案を参考にOpenAI画像生成で制作。制作指示：金細工、小花、緑の葉、中央エメラルド、温かな羊皮紙。文字・ボタン・背景を除いた透過の空枠として生成し、可変の実テキストを重ねる。スマホ向けに九分割の枠として使用。
+本文はKlee One（Copyright 2020 The Klee Project Authors）、見出しはKaisei Decolを元に制作。SIL Open Font License 1.1に従い、ゲーム中の文字にサブセット化し、内部ファミリー名をYaminiwa Story Text / Yaminiwa Story Headingへ変更。ライセンス全文はFONT-LICENSES.txt。元フォント：
+https://github.com/google/fonts/tree/main/ofl/kleeone
+https://github.com/google/fonts/tree/main/ofl/kaiseidecol
+https://github.com/fontworks-fonts/Klee
