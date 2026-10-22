@@ -451,6 +451,14 @@ h1,h2,h3,.tag .t1,#title .title-name{font-family:var(--book-heading);font-weight
 @media(max-height:560px){.guide-welcome{width:min(90vw,500px);padding-top:12px!important}.guide-welcome #guideWelcomeTitle{font-size:25px}.guide-leaves{display:none}.guide-welcome .guide-flourish{margin-bottom:5px}.guide-welcome p{margin:8px 0}.guide-coach{max-width:350px}.guide-resume{top:12px;right:12px}}
 @media(prefers-reduced-motion:reduce){.guide-main:active{transform:none}}
 
+
+/* Dialog guidance participates in the same scroll flow as the choices. */
+.modal .dlg>.guide-inline{position:relative!important;inset:auto!important;width:100%!important;max-width:none!important;max-height:none!important;overflow:visible!important;margin:14px 0 22px;z-index:auto;box-sizing:border-box;pointer-events:auto}
+.modal .guide-inline h2{font-size:18px!important;letter-spacing:.02em!important;line-height:1.6!important;margin:4px 0 8px!important}
+.modal .guide-inline #guideCoachText{font-size:14px!important;letter-spacing:.015em!important;line-height:1.85!important;text-align:left!important;overflow-wrap:anywhere}
+.modal .guide-inline .guide-kicker{letter-spacing:.03em!important;font-size:11px!important}
+.modal .guide-inline .guide-coach-actions>button{min-height:44px}
+
 </style>
 </head>
 <body>
@@ -584,7 +592,7 @@ window.addEventListener('unhandledrejection',function(e){show('Promise: '+(e.rea
 
   <div class="hud g-only campfire-invitation"><button class="sh campfire-hot" id="hCampfire" aria-label="焚き火を開く"><span class="campfire-invite-title">🔥 火のそばへ</span><span class="campfire-invite-arrow" aria-hidden="true">↗</span></button><button class="sh campfire-hot" id="hCampfireP" aria-label="焚き火を開く"><span class="campfire-invite-title">🔥 火のそばへ</span><span class="campfire-invite-arrow" aria-hidden="true">↗</span></button></div>
   <header class="hud" id="hudTop">
-    <div class="tag"><div class="col"><div class="t1">闇庭</div><div class="t2"><span id="sceneName">庭</span> · Ver 1.6.1</div><div class="garden-menu-wrap"><label class="sr-only" for="gardenMenu">庭のメニュー</label><select id="gardenMenu"><option value="">🌿 庭のメニュー</option><option id="nightSwitch" value="time">🌙 夜にする</option><option id="fireDestination" value="fire" disabled>🔥 焚き火</option><option value="guide">📖 遊び方ガイド</option></select></div></div></div>
+    <div class="tag"><div class="col"><div class="t1">闇庭</div><div class="t2"><span id="sceneName">庭</span> · Ver 1.6.2</div><div class="garden-menu-wrap"><label class="sr-only" for="gardenMenu">庭のメニュー</label><select id="gardenMenu"><option value="">🌿 庭のメニュー</option><option id="nightSwitch" value="time">🌙 夜にする</option><option id="fireDestination" value="fire" disabled>🔥 焚き火</option><option value="guide">📖 遊び方ガイド</option></select></div></div></div>
     <div class="hgroup">
       <div class="tag coin" aria-label="所持通貨"><svg class="ic"><use href="#i-coin"/></svg><span id="coinN">0</span></div>
       <button class="sq" id="bBgm" aria-label="BGMのオン／オフ"><svg class="ic"><use href="#i-music"/></svg><i class="slash"></i></button>
@@ -1082,8 +1090,8 @@ vp.addEventListener('pointerup',endDrag); vp.addEventListener('pointercancel',en
 let toastT=0;
 function toast(msg,ms=2600){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),ms); }
 let lastFocus=null;
-function openModal(id){ const m=$(id); lastFocus=document.activeElement; m.classList.add('open'); const b=$('.x',m); setTimeout(()=>b&&b.focus(),50); sfx.click(); }
-function closeModals(){ $$('.modal.open').forEach(m=>m.classList.remove('open')); if(lastFocus&&lastFocus.focus){try{lastFocus.focus();}catch(_){}} }
+function openModal(id){ const m=$(id); lastFocus=document.activeElement; m.classList.add('open'); const b=$('.x',m); setTimeout(()=>b&&b.focus(),50); sfx.click(); setTimeout(renderGuide,0); }
+function closeModals(){ $$('.modal.open').forEach(m=>m.classList.remove('open')); setTimeout(renderGuide,0); if(lastFocus&&lastFocus.focus){try{lastFocus.focus();}catch(_){}} }
 $$('.modal').forEach(m=>{ m.addEventListener('click',e=>{ if(e.target===m||e.target.closest('[data-close]')) closeModals(); }); });
 addEventListener('keydown',e=>{ if(e.key==='Escape') closeModals(); });
 let hp=0; const hpPages=$$('#mHelp .pg');
@@ -1992,6 +2000,7 @@ function guideDescription(){
   if(s==='gather')return stageOf(now)==='grown'?result('🌿 まずは、素材を採取','下の「採取」を押してみましょう。育った草花から、ポーションの素材を集められます。','#bGather'):result('🌱 庭はいま、育つ途中','今は採取できない状態です。すでに持っている素材を確かめて、水やりと調合の使い方を見てみましょう。','#bMat','今の状態で進む','inventory');
   if(s==='inventory')return g.inventoryViewed?result('🎒 素材が見つかりました','素材を押すと、名前・属性・レア度・持っている数が分かります。素材を眺め終えたら、次へ進みましょう。','#bMat','水やりの案内へ','water'):result('🎒 集めた素材は、ここに','右下の「素材」を押して、持ち物を開いてみましょう。庭で集めたものは、自動で保存されます。','#bMat');
   if(s==='water'){
+   if($('#mRain').classList.contains('open'))return result('☔ 好きな雨を選んでね',state.garden.phase==='empty'?'好きな雨を押すと、水やり完了です。選んだ雨を眺めてみましょう。':'水やりは済んでいます。好きな雨を眺め直せます。成長の時刻は変わりません。','[data-rain]',state.garden.phase==='empty'?'':'調合室の案内へ',state.garden.phase==='empty'?'':'room');
    if(state.garden.phase!=='empty')return result('💧 水やりと、庭の成長','今の庭は、水やり済みか、すでに育っています。空の庭に水をあげると約3分で芽が出て、日本時間の翌日0時に育ちきります。','#bWater','調合室の案内へ','room');
    return $('#mRain').classList.contains('open')?result('☔ 好きな雨を選んでね','ふつうの雨、ミルクティーの雨、レモンティーの雨から選べます。空の庭に降らせると、水やり完了です。','[data-rain]'):result('💧 庭へ、水をあげよう','下の「水やり」を押して、好きな雨を選びましょう。採取したあとの庭で、次の草花を育てます。','#bWater');
   }
@@ -2022,22 +2031,38 @@ function guideDescription(){
  }
  return result('📖 いつでも、やり直せます','案内は庭のメニューから見直せます。','#gardenMenu','案内を終える','finish');
 }
+function mountGuideCard(){
+ const card=$('#guideCoach'),modal=$$('.modal.open').at(-1);
+ if(modal){
+  const expected=state.guide.topic==='basic'?(state.guide.step==='water'?'mRain':state.guide.step.startsWith('brew')?'mBrew':''):'mCampfire';
+  if(modal.id!==expected){card.hidden=true;clearGuideTarget();return false;}
+  const panel=$('.dlg',modal);if(!panel){card.hidden=true;return false;}
+  if(card.parentElement!==panel){const subtitle=$('.sub',panel),heading=$('h2',panel);(subtitle||heading)?.insertAdjacentElement('afterend',card);if(card.parentElement!==panel)panel.prepend(card);}
+  card.classList.add('guide-inline');card.classList.remove('guide-compact');
+  card.style.top='';card.style.left='';card.style.width='';
+ }else{
+  if(card.parentElement!==$('#game'))$('#game').append(card);
+  card.classList.remove('guide-inline');
+ }
+ return true;
+}
 function renderGuide(){
  const g=state.guide,coach=$('#guideCoach');if(!started||g.paused||!guideShown||!g.topic){coach.hidden=true;clearGuideTarget();return;}
+ if(!mountGuideCard())return;
  const d=guideDescription(),order=g.topic==='basic'?['gather','inventory','water','room','brew']:['night','fireOpen','fireHub','fireWood','fireFood','fireConfirm','fireCooking','fireResult'];
  const index=g.topic==='basic'?(g.step.startsWith('brew')?4:Math.max(0,order.indexOf(g.step))):Math.max(0,order.indexOf(g.step));
  const signature=[g.topic,g.step,d.title,d.text,d.target,d.button].join('|');
  if(signature!==guideLastSignature){
   guideLastSignature=signature;$('#guideCoachTitle').textContent=d.title;$('#guideCoachText').textContent=d.text;$('#guideCoachCount').textContent=(g.topic==='basic'?'庭と調合':'焚き火')+'の案内 · '+(index+1)+' / '+order.length;
   $('#guideBack').disabled=['brewWait','brewResult','fireCooking','fireResult'].includes(g.step)||GUIDE_STEPS[g.topic].indexOf(g.step)<=0;
-  $('#guideNext').hidden=!d.button;$('#guideNext').textContent=d.button;$('#guideNext').onclick=()=>{if(d.next==='finish'){guideFinish();return;}state.guide.step=d.next;commit();if(d.next==='water'){toggleMat(false);}renderGuide();};
+  $('#guideNext').hidden=!d.button;$('#guideNext').textContent=d.button;$('#guideNext').onclick=()=>{if(d.next==='finish'){guideFinish();return;}state.guide.step=d.next;commit();if(d.next==='water'){toggleMat(false);}if(d.next==='room'){closeModals();}renderGuide();};
  }
  coach.hidden=false;$('#guideResume').hidden=true;clearGuideTarget();
  const targets=$$(d.target);guideTarget=targets.find(el=>{const r=el.getBoundingClientRect();const b=$('#game').getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>b.top&&r.top<b.bottom;})||null;
  if(guideTarget)guideTarget.classList.add('guide-target');positionGuide();
 }
 function positionGuide(){
- const card=$('#guideCoach');if(card.hidden)return;const bounds=$('#game').getBoundingClientRect(),pad=12,w=Math.min(350,bounds.width-24);card.style.width=w+'px';
+ const card=$('#guideCoach');if(card.hidden||card.classList.contains('guide-inline'))return;const bounds=$('#game').getBoundingClientRect(),pad=12,w=Math.min(350,bounds.width-24);card.style.width=w+'px';
  const h=card.offsetHeight,rect=guideTarget?.getBoundingClientRect(),r=rect?{top:Math.max(bounds.top,rect.top),bottom:Math.min(bounds.bottom,rect.bottom)}:null;
  let top=r&&r.top-bounds.top>=h+24?r.top-bounds.top-h-16:r&&bounds.bottom-r.bottom>=h+24?r.bottom-bounds.top+16:Math.max(12,(bounds.height-h)/2);
  top=Math.max(pad,Math.min(top,bounds.height-h-pad));

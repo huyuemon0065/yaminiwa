@@ -44,3 +44,20 @@ assert.equal(resumeCtx.state.guide.paused,false);assert.equal(resumeCtx.guideSho
 assert.equal(resumeCtx.state.guide.step,'brewPick','resume preserves the current step');
 assert.equal(resumeCtx.commitCount,1);assert.equal(resumeCtx.renderCount,1);
 console.log('PASS resume: tappable HUD button restores the paused guide without restarting progress');
+// Execute actual card mounting with dialog/scene transitions. The dialog owns the
+// card in normal flow, and unrelated dialogs must not display floating guidance.
+function node(id){return {id,hidden:false,style:{},parentElement:null,classes:new Set(),classList:{add(c){this.owner.classes.add(c)},remove(c){this.owner.classes.delete(c)},contains(c){return this.owner.classes.has(c)}},append(child){child.parentElement=this},prepend(child){child.parentElement=this},insertAdjacentElement(_,child){child.parentElement=this.parentElement}}}
+const card=node('guideCoach'),game=node('game');for(const n of [card,game])n.classList.owner=n;
+let active=[];const panels=new Map();for(const id of ['mRain','mBrew','mCampfire','mHelp']){const modal=node(id),panel=node(id+'Panel'),sub=node(id+'Sub');sub.parentElement=panel;panels.set(modal,{panel,sub});}
+const layoutCtx={state:{guide:{topic:'basic',step:'water'}},cleared:0,$:(sel,scope)=>sel==='#guideCoach'?card:sel==='#game'?game:sel==='.dlg'?panels.get(scope)?.panel:sel==='.sub'?Array.from(panels.values()).find(x=>x.panel===scope)?.sub:null,$$:()=>active};
+vm.createContext(layoutCtx);vm.runInContext('function clearGuideTarget(){cleared++}',layoutCtx);
+vm.runInContext(code.slice(code.indexOf('function mountGuideCard(){'),code.indexOf('function renderGuide(){'))+';this.mount=mountGuideCard;',layoutCtx);
+for(const [topic,step,id] of [['basic','water','mRain'],['basic','brewPick','mBrew'],['basic','brewConfirm','mBrew'],['basic','brewResult','mBrew'],['fire','fireWood','mCampfire'],['fire','fireCooking','mCampfire'],['fire','fireResult','mCampfire']]){
+ layoutCtx.state.guide={topic,step};active=[...panels.keys()].filter(x=>x.id===id);assert.equal(layoutCtx.mount(),true);assert.equal(card.parentElement,panels.get(active[0]).panel);assert.ok(card.classes.has('guide-inline'));assert.equal(card.style.top,'');
+}
+active=[...panels.keys()].filter(x=>x.id==='mHelp');assert.equal(layoutCtx.mount(),false);assert.equal(card.hidden,true);
+active=[];assert.equal(layoutCtx.mount(),true);assert.equal(card.parentElement,game);assert.equal(card.classes.has('guide-inline'),false);
+assert.match(html,/\.modal \.dlg>\.guide-inline\{[^}]*position:relative!important/);
+assert.ok(code.includes("if(d.next==='room'){closeModals();}"),'next scene dismisses rain choices');
+vm.runInContext('state.guide.topic="basic";state.guide.step="water";state.garden.phase="watered";',saveCtx);opened.add('#mRain');assert.equal(saveCtx.desc().target,'[data-rain]');assert.equal(saveCtx.desc().next,'room');opened.delete('#mRain');
+console.log('PASS layout: rain, brewing and campfire guide cards live inside dialog flow; unrelated dialogs hide them; scene return restores HUD; watered-rain explanation and exit remain available');
