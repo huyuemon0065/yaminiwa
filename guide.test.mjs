@@ -30,3 +30,17 @@ assert.ok(html.includes('value="guide"'));assert.ok(html.includes('id="guideLibr
 for(const f of ['klee-one.woff','kaisei-decol.woff']){const b=fs.readFileSync(new URL('./'+f,import.meta.url));assert.equal(b.toString('ascii',0,4),'wOFF');assert.ok(b.length>50000);}
 for(const action of ['gather','inventory','water','scene','brewOpen','brewSelect','brewStarted','brewFinished','night','fireOpen','fireView','fireTaken'])assert.ok(code.includes("guideAction('"+action+"'"),'successful action hook '+action);
 console.log('PASS guide: action-driven progress, wrong actions, pause/resume/replay, insufficient materials, growing garden, existing cooking/used fire, daily-limit explanations, migration/import, decorative frame, local fonts and unique IDs');
+
+// The resume chip is itself a .hud: its own hit area must override .hud pointer-events:none.
+const resumeCSS=[...html.matchAll(/\.guide-resume\{([^}]+)\}/g)].map(m=>m[1]).join(';');
+assert.match(resumeCSS,/pointer-events\s*:\s*auto(?:;|$)/,'resume button accepts pointer/touch input');
+const resumeNodes=new Map([['#guideResume',{hidden:false}]]);
+const resumeCtx={state:{guide:{topic:'basic',step:'brewPick',paused:true}},guideShown:false,commitCount:0,renderCount:0,$:id=>resumeNodes.get(id)};
+vm.createContext(resumeCtx);
+vm.runInContext('function commit(){commitCount++}function renderGuide(){renderCount++}',resumeCtx);
+const handler=code.match(/\$\('#guideResume'\)\.onclick=\(\)=>\{[^\n]+/)[0];
+vm.runInContext(handler,resumeCtx);resumeNodes.get('#guideResume').onclick();
+assert.equal(resumeCtx.state.guide.paused,false);assert.equal(resumeCtx.guideShown,true);
+assert.equal(resumeCtx.state.guide.step,'brewPick','resume preserves the current step');
+assert.equal(resumeCtx.commitCount,1);assert.equal(resumeCtx.renderCount,1);
+console.log('PASS resume: tappable HUD button restores the paused guide without restarting progress');

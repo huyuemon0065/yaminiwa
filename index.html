@@ -442,7 +442,7 @@ h1,h2,h3,.tag .t1,#title .title-name{font-family:var(--book-heading);font-weight
 .guide-coach h2{font-size:19px;margin:5px 0 8px;line-height:1.55}.guide-coach #guideCoachText{font-size:14px;line-height:1.8;margin:8px 0 12px;text-align:left}.guide-coach .guide-kicker{font-size:11px;margin:2px 0 7px}
 .guide-coach-actions{display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px 8px;border-top:1px solid #ae8e5d44;padding-top:5px}.guide-coach-actions>button{min-height:40px;padding:8px 5px;color:#6f5130;font:13px var(--book-body)}.guide-coach-actions>.guide-main{flex-basis:100%;color:#fbefc6;padding:9px 11px;font-family:var(--book-heading);font-size:14px;min-height:44px}
 .guide-compact{padding-top:4px!important;padding-bottom:2px!important}.guide-compact h2{font-size:17px}.guide-compact .guide-kicker{display:none}.guide-compact #guideCoachText{font-size:13px;line-height:1.65}
-.guide-resume{position:absolute;z-index:64;right:12px;top:calc(142px + var(--sat));min-height:44px;padding:10px 13px;border:1px solid #c1a26a;border-radius:10px;background:#183d2cef;color:#f4e4bd;font:14px var(--book-heading);box-shadow:0 3px 12px #0004}
+.guide-resume{position:absolute;pointer-events:auto;z-index:64;right:12px;top:calc(142px + var(--sat));min-height:44px;padding:10px 13px;border:1px solid #c1a26a;border-radius:10px;background:#183d2cef;color:#f4e4bd;font:14px var(--book-heading);box-shadow:0 3px 12px #0004}
 .guide-target{outline:2px solid #ffe6a2!important;outline-offset:5px;box-shadow:0 0 0 5px #d4ac4e28,0 0 18px #f1c45c55!important}
 .story-panel button:focus-visible,.story-panel summary:focus-visible,.guide-resume:focus-visible{outline:2px solid #ad7c26;outline-offset:3px}
 #mGuideWelcome,#mGuideLibrary{z-index:71;background:#0a191a4d;backdrop-filter:blur(2px)}
@@ -584,7 +584,7 @@ window.addEventListener('unhandledrejection',function(e){show('Promise: '+(e.rea
 
   <div class="hud g-only campfire-invitation"><button class="sh campfire-hot" id="hCampfire" aria-label="焚き火を開く"><span class="campfire-invite-title">🔥 火のそばへ</span><span class="campfire-invite-arrow" aria-hidden="true">↗</span></button><button class="sh campfire-hot" id="hCampfireP" aria-label="焚き火を開く"><span class="campfire-invite-title">🔥 火のそばへ</span><span class="campfire-invite-arrow" aria-hidden="true">↗</span></button></div>
   <header class="hud" id="hudTop">
-    <div class="tag"><div class="col"><div class="t1">闇庭</div><div class="t2"><span id="sceneName">庭</span> · Ver 1.6.0</div><div class="garden-menu-wrap"><label class="sr-only" for="gardenMenu">庭のメニュー</label><select id="gardenMenu"><option value="">🌿 庭のメニュー</option><option id="nightSwitch" value="time">🌙 夜にする</option><option id="fireDestination" value="fire" disabled>🔥 焚き火</option><option value="guide">📖 遊び方ガイド</option></select></div></div></div>
+    <div class="tag"><div class="col"><div class="t1">闇庭</div><div class="t2"><span id="sceneName">庭</span> · Ver 1.6.1</div><div class="garden-menu-wrap"><label class="sr-only" for="gardenMenu">庭のメニュー</label><select id="gardenMenu"><option value="">🌿 庭のメニュー</option><option id="nightSwitch" value="time">🌙 夜にする</option><option id="fireDestination" value="fire" disabled>🔥 焚き火</option><option value="guide">📖 遊び方ガイド</option></select></div></div></div>
     <div class="hgroup">
       <div class="tag coin" aria-label="所持通貨"><svg class="ic"><use href="#i-coin"/></svg><span id="coinN">0</span></div>
       <button class="sq" id="bBgm" aria-label="BGMのオン／オフ"><svg class="ic"><use href="#i-music"/></svg><i class="slash"></i></button>
