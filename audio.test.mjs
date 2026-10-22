@@ -8,7 +8,7 @@ function param(){return {value:0,setValueAtTime(v,t){assert(Number.isFinite(v)&&
 function node(){nodes++;return {gain:param(),frequency:param(),Q:param(),connect(){},disconnect(){},start(t=0){assert(t>=0);},stop(t){assert(Number.isFinite(t)&&t>=0);}};}
 const c={sampleRate:22050,currentTime:0,createGain:node,createOscillator:node,createBiquadFilter:node,createConvolver:node,createBufferSource:node,createBuffer(ch,n){assert(n>0);return {getChannelData(){return new Float32Array(n);}};}};
 const sandbox={Math,Number,console,c,out:node()};vm.createContext(sandbox);
-const start=code.indexOf('const mtof=');const end=code.indexOf('const sfx=');
+const start=code.indexOf('const mtof=');const end=code.indexOf('function createMusicPlayer(');
 vm.runInContext(code.slice(start,end)+'\nthis.kit=makeSfxKit(c,out);this.bgm=makeBgm(c,out);',sandbox);
 for(const name of ['click','toggle','sparkle','soft','water','harvest','brew','discover','fail','coin'])sandbox.kit[name]();
 sandbox.bgm.resync(0);sandbox.bgm.run(130); // Several complete sections, including the echo variation.
