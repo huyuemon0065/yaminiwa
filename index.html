@@ -460,10 +460,13 @@ window.addEventListener('unhandledrejection',function(e){show('Promise: '+(e.rea
     <div class="tabpane" data-pane="set">
       <div class="setrow"><label for="vBgm">BGMの音量</label><input type="range" id="vBgm" min="0" max="100" step="1"></div>
       <div class="setrow"><label for="vSfx">効果音の音量</label><input type="range" id="vSfx" min="0" max="100" step="1"></div>
+      <div class="setrow"><label for="vAmb">環境音の音量</label><input type="range" id="vAmb" min="0" max="100" step="1"></div>
+      <div class="setrow"><label for="hapticEnabled">軽い振動（対応端末のみ）</label><input type="checkbox" id="hapticEnabled"></div>
+      <p class="note">静かなピアノと、庭・調合室の空気の音。音量は小さめから調整してね。振動は最初はオフです。</p>
       <p class="savestat" id="saveStat">最後の保存：—</p>
       <div class="row"><button class="btn" id="sSave">いますぐ保存</button><button class="btn" id="sLink">記憶と継ぎ</button></div>
       <div class="row"><button class="btn danger" id="sReset">データを消す</button></div>
-      <p class="verline" id="verLine">Ver 1.0.0 · Phase 2</p>
+      <p class="verline" id="verLine">Ver 1.1.0 · Soft Sound</p>
       <div class="dbg" id="dbg"><b>テスト用（開発者向け）</b><div id="dbgState" style="margin-top:6px"></div>
         <div class="row"><button class="btn" id="dTime">3分すすめる</button><button class="btn" id="dDay">翌日にする</button><button class="btn" id="dEmpty">畑を空にする</button><button class="btn" id="dMats">素材を足す</button></div></div>
       <div class="confirm" id="resetConfirm"><p>セーブデータを、すべて消します。<b>元には戻せません。</b></p><div class="row"><button class="btn danger" id="sResetYes">消す</button><button class="btn" id="sResetNo">やめる</button></div></div>
@@ -594,7 +597,7 @@ const RECIPE_TOTAL=Object.keys(ALL_RECIPES).length;
 /* ---------- save (v2).  Old v1 saves (settings only) are carried over. ---------- */
 const KEY='yaminiwa.save.v2', OLD_KEY='yaminiwa.save.v1', SAVE_VERSION=2;
 const ci=(v,a,b)=>{ const n=Math.floor(Number(v)); return isFinite(n)?Math.min(b,Math.max(a,n)):a; };
-const fresh=()=>({version:SAVE_VERSION,coins:0,inventory:{},settings:{bgm:true,bgmVol:.7,sfxVol:.8},garden:{phase:'ready',wateredAt:0,careDay:-1,careBoost:false},recipes:{},potions:{},requests:{day:0,done:[]},lastSaved:0});
+const fresh=()=>({version:SAVE_VERSION,coins:0,inventory:{},settings:{bgm:true,bgmVol:.7,sfxVol:.8,ambVol:.3,haptics:false},garden:{phase:'ready',wateredAt:0,careDay:-1,careBoost:false},recipes:{},potions:{},requests:{day:0,done:[]},lastSaved:0});
 /* turns any loaded / imported object into a safe, valid save (unknown ids dropped, numbers clamped) */
 function sanitize(o){
   if(!o||typeof o!=='object'||typeof o.version!=='number') throw new Error('bad save');
@@ -605,6 +608,8 @@ function sanitize(o){
   s.settings.bgm=st.bgm!==false;
   s.settings.bgmVol=Math.min(1,Math.max(0,Number(st.bgmVol===undefined?.7:st.bgmVol)||0));
   s.settings.sfxVol=Math.min(1,Math.max(0,Number(st.sfxVol===undefined?.8:st.sfxVol)||0));
+  s.settings.ambVol=Math.min(1,Math.max(0,Number(st.ambVol===undefined?.3:st.ambVol)||0));
+  s.settings.haptics=st.haptics===true;
   const g=o.garden&&typeof o.garden==='object'?o.garden:{};
   s.garden.phase=(g.phase==='empty'||g.phase==='watered')?g.phase:'ready';
   s.garden.wateredAt=s.garden.phase==='watered'?ci(g.wateredAt,0,8640000000000000):0;
@@ -743,7 +748,7 @@ function openHelp(){ helpPage(0); showTab('hint'); openModal('#mHelp'); }
 /* ---- the tune: a calm, sunny little town song (C major, 82 BPM) ---- */
 const mtof=m=>440*Math.pow(2,(m-69)/12);
 function makeBgm(c,out){
-  const E=60/82/2, SWING=.1;
+  const E=60/66/2, SWING=.065;
   const SECT={
     A:{chords:[[52,55,59,64],[52,55,57,60],[53,57,60,62],[55,59,62,64],[52,57,60,64],[52,55,59,62],[53,57,60,62],[52,55,59,64]],
        bass:[36,45,38,43,41,40,38,36],
@@ -757,19 +762,19 @@ function makeBgm(c,out){
   const SEQ=['A','B','A','B'];
   // buses -> soft low-pass -> out (+ gentle room reverb)
   const mix=c.createGain(); mix.gain.value=1;
-  const lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=5200; lp.Q.value=.3; mix.connect(lp); lp.connect(out);
+  const lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2800; lp.Q.value=.3; mix.connect(lp); lp.connect(out);
   const conv=c.createConvolver(), len=Math.floor(c.sampleRate*1.9), ib=c.createBuffer(2,len,c.sampleRate);
   for(let ch=0;ch<2;ch++){ const d=ib.getChannelData(ch); for(let k=0;k<len;k++) d[k]=(Math.random()*2-1)*Math.pow(1-k/len,2.6); }
-  conv.buffer=ib; const wet=c.createGain(); wet.gain.value=.26; lp.connect(conv); conv.connect(wet); wet.connect(out);
+  conv.buffer=ib; const wet=c.createGain(); wet.gain.value=.18; lp.connect(conv); conv.connect(wet); wet.connect(out);
   const mel=c.createGain(); mel.gain.value=1; mel.connect(mix);
   const comp=c.createGain(); comp.gain.value=1; comp.connect(mix);
   const bs=c.createGain(); bs.gain.value=1; bs.connect(mix);
   const nb=c.createBuffer(1,c.sampleRate,c.sampleRate), nd=nb.getChannelData(0); for(let k=0;k<nd.length;k++) nd[k]=Math.random()*2-1;
   function piano(m,t,L,v,dest){
     t=Math.max(t,c.currentTime,0); const f=mtof(m), g=c.createGain(), a=c.createOscillator(), b=c.createOscillator(), gb=c.createGain();
-    a.type='sine'; a.frequency.value=f; b.type='sine'; b.frequency.value=f*2; gb.gain.value=.22; a.connect(g); b.connect(gb); gb.connect(g);
+    a.type='sine'; a.frequency.value=f; b.type='sine'; b.frequency.value=f*2; gb.gain.value=.12; a.connect(g); b.connect(gb); gb.connect(g);
     const d=Math.max(.5,L)+.5;
-    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+.007); g.gain.exponentialRampToValueAtTime(Math.max(v*.38,.001),t+.22); g.gain.exponentialRampToValueAtTime(.0005,t+d+.9);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+.025); g.gain.exponentialRampToValueAtTime(Math.max(v*.38,.001),t+.22); g.gain.exponentialRampToValueAtTime(.0005,t+d+.9);
     g.connect(dest); a.start(t); b.start(t); a.stop(t+d+1); b.stop(t+d+1);
   }
   function bass(m,t,L,v){
@@ -788,9 +793,9 @@ function makeBgm(c,out){
     const s=step%64, bar=Math.floor(s/8), st=s%8, sec=SECT[SEQ[secIdx]], echo=secIdx>=2;
     const tt=t+(st%2?E*SWING:0);
     if(st===0) bass(sec.bass[bar]+12,tt,3*E,.2); if(st===4) bass(sec.bass[bar]+12,tt,2*E,.1);
-    if(st===2||st===6) sec.chords[bar].forEach((m,i)=>piano(m,tt+i*.011,E*1.4,.085,comp));
-    for(const n of sec.mel[bar]) if(n[1]===st){ piano(n[0],tt+(Math.random()-.5)*.008,n[2]*E,.36*hum(),mel); if(echo) piano(n[0]+12,tt+E*.75,n[2]*E,.05,mel); }
-    if(st%2===1) hat(tt,.012*hum());
+    if(st===2||st===6) sec.chords[bar].forEach((m,i)=>piano(m,tt+i*.011,E*1.4,.06,comp));
+    for(const n of sec.mel[bar]) if(n[1]===st){ piano(n[0],tt+(Math.random()-.5)*.008,n[2]*E,.23*hum(),mel); if(echo) piano(n[0]+12,tt+E*.75,n[2]*E,.05,mel); }
+    // Leave breathing room between the felt-like piano notes.
   }
   return {
     resync(t){ nextT=t; },
@@ -801,53 +806,61 @@ function makeBgm(c,out){
 
 /* ---- tap sounds: soft water-drop "pon" and jelly "puruun" (sine only, nothing below ~390 Hz) ---- */
 function makeSfxKit(c,out){
-  const PENT=[523.25,587.33,659.25,783.99,880];
-  const pick=()=>PENT[Math.floor(Math.random()*PENT.length)];
-  function pop(f,v,when,dur){
-    v=v||.15; dur=dur||.17; const t=c.currentTime+(when||0);
-    const o=c.createOscillator(), o2=c.createOscillator(), g=c.createGain(), g2=c.createGain(), lp=c.createBiquadFilter();
-    o.type='sine'; o2.type='sine';
-    o.frequency.setValueAtTime(f*.72,t); o.frequency.exponentialRampToValueAtTime(f,t+.045);
-    o2.frequency.setValueAtTime(f*1.44,t); o2.frequency.exponentialRampToValueAtTime(f*2,t+.045);
-    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+.006); g.gain.exponentialRampToValueAtTime(.0004,t+dur);
-    g2.gain.value=.22; lp.type='lowpass'; lp.frequency.value=3800;
-    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(lp); lp.connect(out);
-    o.start(t); o2.start(t); o.stop(t+dur+.05); o2.stop(t+dur+.05);
+  // Close, rounded object sounds; no hard impulses or sharp high-frequency clicks.
+  const bus=c.createBiquadFilter(); bus.type='lowpass'; bus.frequency.value=2400; bus.Q.value=.45; bus.connect(out);
+  const noise=c.createBuffer(1,Math.ceil(c.sampleRate*.5),c.sampleRate), data=noise.getChannelData(0);
+  for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*.5;
+  function tone(f,v=.1,when=0,dur=.22,slide=1){
+    const t=c.currentTime+when,o=c.createOscillator(),g=c.createGain();o.type='sine';
+    o.frequency.setValueAtTime(f*slide,t);o.frequency.exponentialRampToValueAtTime(f,t+.065);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+dur);g.gain.linearRampToValueAtTime(0,t+dur+.025);
+    o.connect(g);g.connect(bus);o.start(t);o.stop(t+dur+.03);o.onended=()=>{o.disconnect();g.disconnect();};
   }
-  function plop(f,v,when){
-    v=v||.14; const t=c.currentTime+(when||0);
-    const o=c.createOscillator(), g=c.createGain(), lfo=c.createOscillator(), lg=c.createGain(), lp=c.createBiquadFilter();
-    o.type='sine'; o.frequency.setValueAtTime(f*1.25,t); o.frequency.exponentialRampToValueAtTime(f,t+.07);
-    lfo.type='sine'; lfo.frequency.value=24; lg.gain.setValueAtTime(f*.06,t); lg.gain.exponentialRampToValueAtTime(.5,t+.28); lfo.connect(lg); lg.connect(o.frequency);
-    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+.01); g.gain.exponentialRampToValueAtTime(.0004,t+.3);
-    lp.type='lowpass'; lp.frequency.value=3000; o.connect(g); g.connect(lp); lp.connect(out);
-    o.start(t); lfo.start(t); o.stop(t+.34); lfo.stop(t+.34);
+  function texture(v=.035,when=0,dur=.08,freq=900){
+    const t=c.currentTime+when,n=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();n.buffer=noise;
+    f.type='bandpass';f.frequency.value=freq;f.Q.value=.65;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.009);g.gain.exponentialRampToValueAtTime(.0001,t+dur);g.gain.linearRampToValueAtTime(0,t+dur+.018);
+    n.connect(f);f.connect(g);g.connect(bus);n.start(t,0,dur+.02);n.onended=()=>{n.disconnect();f.disconnect();g.disconnect();};
   }
+  const pop=(f=440,v=.09,w=0,d=.22)=>tone(f,v,w,d,.82);
+  const plop=(f=330,v=.09,w=0)=>{tone(f,v,w,.29,1.35);tone(f*1.5,v*.18,w+.015,.2);};
   return {
-    click(){ pop(pick(),.21); },
-    toggle(){ plop(pick(),.19); },
-    sparkle(){ pop(659.25,.14,0,.2); pop(783.99,.12,.07,.2); pop(1046.5,.1,.14,.28); },
-    soft(){ plop(440,.17); pop(659.25,.11,.09,.24); },
-    brew(){ for(let i=0;i<9;i++) pop(pick()*(Math.random()<.5?1:.75),.075,i*.17+Math.random()*.05,.14); },
-    discover(){ pop(659.25,.13,0,.22); pop(783.99,.12,.1,.22); pop(987.77,.12,.2,.24); pop(1318.5,.11,.31,.4); },
-    fail(){ plop(587.33,.15); plop(392,.13,.2); },
-    coin(){ pop(1174.66,.12,0,.12); pop(1567.98,.12,.07,.2); },
+    click(){texture(.065,0,.055,740);tone(270+Math.random()*24,.075,0,.095,1.08);},
+    toggle(){texture(.035,0,.065,1100);plop(392,.065);},
+    sparkle(){[523.25,659.25,783.99].forEach((f,i)=>tone(f,.063-i*.009,i*.095,.38));},
+    soft(){texture(.05,0,.16,620);tone(330,.055,.018,.26);},
+    water(){[0,.13,.3,.49].forEach((t,i)=>plop(370+i*31,.065,t));texture(.07,.05,.35,1200);},
+    harvest(){texture(.08,0,.17,1050);texture(.065,.13,.16,760);tone(440,.065,.12,.28);},
+    brew(){for(let i=0;i<10;i++)plop(240+Math.random()*220,.045,i*.145);},
+    discover(){[523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,.07-i*.009,i*.14,.55));},
+    fail(){texture(.055,0,.22,420);plop(294,.07);plop(262,.055,.19);},
+    coin(){tone(783.99,.065,0,.27);tone(1046.5,.035,.085,.36);texture(.025,0,.04,1800);},
     pop,plop
   };
 }
 
 const sfx=(()=>{
-  let ctx=null, master,music,sfxg, ok=false, musicOn=true, bgm=null, kit=null, timer=0;
+  let ctx=null, master,music,sfxg, ok=false, musicOn=true, bgm=null, kit=null, timer=0, ambience=null, ambientFilter=null, lastTap=-1;
   function init(){
     if(ctx) return ok;
     try{
       const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false;
       try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(_){}
       ctx=new AC();
-      master=ctx.createGain(); master.gain.value=.9; master.connect(ctx.destination);
+      master=ctx.createGain(); master.gain.value=.9; const limiter=ctx.createDynamicsCompressor();limiter.threshold.value=-12;limiter.knee.value=15;limiter.ratio.value=4;limiter.attack.value=.006;limiter.release.value=.18;
+      master.connect(limiter);limiter.connect(ctx.destination);
       music=ctx.createGain(); music.gain.value=0; music.connect(master);
       sfxg=ctx.createGain(); sfxg.gain.value=state.settings.sfxVol; sfxg.connect(master);
       kit=makeSfxKit(ctx,sfxg);
+      ambience=ctx.createGain();ambience.gain.value=0;ambience.connect(master);
+      ambientFilter=ctx.createBiquadFilter();ambientFilter.type='lowpass';ambientFilter.frequency.value=850;ambientFilter.Q.value=.35;
+      const nb=ctx.createBuffer(1,ctx.sampleRate*4,ctx.sampleRate),nd=nb.getChannelData(0);let brown=0;
+      for(let i=0;i<nd.length;i++){brown=(brown+(Math.random()*2-1)*.025)/1.025;nd[i]=brown;}
+      // Crossfade the loop seam so the quiet room tone never clicks.
+      const seam=Math.floor(ctx.sampleRate*.08);
+      for(let i=0;i<seam;i++){const t=i/seam;nd[nd.length-seam+i]=nd[nd.length-seam+i]*(1-t)+nd[i]*t;}
+      const ns=ctx.createBufferSource();ns.buffer=nb;ns.loop=true;ns.connect(ambientFilter);ambientFilter.connect(ambience);ns.start();
+      ambience.gain.setTargetAtTime(.12*state.settings.ambVol,ctx.currentTime,.8);
       bgm=makeBgm(ctx,music); bgm.resync(ctx.currentTime+.2);
       timer=setInterval(()=>{ if(ctx&&musicOn&&!document.hidden&&ctx.state==='running') bgm.run(ctx.currentTime+.4); },60);
       ok=true; setMusic(musicOn);
@@ -856,11 +869,13 @@ const sfx=(()=>{
   }
   const musicLevel=()=>.5143*state.settings.bgmVol;   /* default 0.7 -> 0.36 */
   function setMusic(on){ musicOn=on; if(!ctx) return; const t=ctx.currentTime; if(on&&bgm) bgm.resync(t+.15); music.gain.setTargetAtTime(on?musicLevel():0,t,on?1.1:.35); }
-  function applyVolumes(){ if(!ctx) return; const t=ctx.currentTime; if(musicOn) music.gain.setTargetAtTime(musicLevel(),t,.08); sfxg.gain.setTargetAtTime(state.settings.sfxVol,t,.05); }
+  function applyVolumes(){ if(!ctx) return; const t=ctx.currentTime; if(musicOn) music.gain.setTargetAtTime(musicLevel(),t,.08); sfxg.gain.setTargetAtTime(state.settings.sfxVol,t,.05); ambience.gain.setTargetAtTime(.12*state.settings.ambVol,t,.2); }
   function resume(){ if(ctx&&ctx.state==='suspended'){ const p=ctx.resume(); p&&p.then&&p.then(()=>{ if(bgm&&musicOn) bgm.resync(ctx.currentTime+.15); }).catch(()=>{}); } }
-  const play=n=>()=>{ if(kit){ try{ kit[n](); }catch(_){} } };
+  const play=n=>()=>{ if(kit){ try{ const t=ctx.currentTime;if((n==='click'||n==='soft')&&t-lastTap<.065)return;lastTap=t;kit[n](); }catch(_){} } };
+  function setScene(name){if(ambientFilter)ambientFilter.frequency.setTargetAtTime(name==='brew'?470:850,ctx.currentTime,.7);}
+
   document.addEventListener('visibilitychange',()=>{ if(!ctx) return; if(document.hidden){ ctx.suspend&&ctx.suspend().catch(()=>{}); } else resume(); });
-  return {init,resume,setMusic,applyVolumes,click:play('click'),toggle:play('toggle'),sparkle:play('sparkle'),soft:play('soft'),brew:play('brew'),discover:play('discover'),fail:play('fail'),coin:play('coin'),get ready(){return ok;}};
+  return {init,resume,setMusic,applyVolumes,click:play('click'),toggle:play('toggle'),sparkle:play('sparkle'),soft:play('soft'),brew:play('brew'),discover:play('discover'),fail:play('fail'),coin:play('coin'),water:play('water'),harvest:play('harvest'),setScene,get ready(){return ok;}};
 })();
 /* test hook: render the BGM offline (no speakers needed) */
 async function renderSfx(name,sec){
@@ -1047,7 +1062,7 @@ $('#bMat').addEventListener('click',()=>toggleMat());
 function goScene(name){
   if(name===cur||busy) return; busy=true; fade.classList.add('on'); sfx.soft(); toggleMat(false);
   setTimeout(()=>{
-    cur=name; document.body.dataset.scene=name; curFocus=S_().focus; $('#sceneName').textContent=SC[key()].name;
+    cur=name; sfx.setScene(name); document.body.dataset.scene=name; curFocus=S_().focus; $('#sceneName').textContent=SC[key()].name;
     lastKey=key(); syncScene(); buildChips(); fitScene(false); fade.classList.remove('on'); setTimeout(()=>{busy=false;},520);
   },470);
 }
@@ -1254,7 +1269,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden) tickGard
 const GP={ wide:{leaf:[[170,500],[410,520],[600,480],[300,460]],water:i=>[60+i*90,470+(i%3)*30],care:[[300,480],[520,500]]},
            tall:{leaf:[[100,800],[300,830],[390,860],[150,740]],water:i=>[40+i*55,690+(i%4)*45],care:[[130,780],[330,820]]} };
 const gp=()=>document.body.classList.contains('portrait')?GP.tall:GP.wide;
-function pressFx(el){ el.animate&&!reduced&&el.animate([{transform:'scale(1)'},{transform:'scale(.93)'},{transform:'scale(1.04)'},{transform:'scale(1)'}],{duration:260,easing:'ease-out'}); }
+function pressFx(el){ /* Feedback is handled once by the delegated pointer/keyboard handlers. */ }
 const plusEl=$('#matPlus'); let plusT=0;
 function showPlus(n){ plusEl.textContent='+'+n; plusEl.classList.add('show'); clearTimeout(plusT); plusT=setTimeout(()=>plusEl.classList.remove('show'),3400); }
 function rollMaterial(){
@@ -1276,13 +1291,13 @@ $('#bGather').addEventListener('click',e=>{ pressFx(e.currentTarget); const g=st
   const care=g.careBoost; g.careBoost=false; g.phase='empty'; g.wateredAt=0; commit(); tickGarden(false);
   const ids=Object.keys(got); renderMats(ids); showPlus(n);
   const f=gfx(); gp().leaf.forEach((p,i)=>setTimeout(()=>{ f.burst(p[0],p[1],'leaf'); f.burst(p[0],p[1],'gold'); if(rare&&i===1){ f.burst(p[0],p[1]-30,'gold'); f.burst(p[0],p[1]-30,'gold'); } },i*220));
-  sfx.sparkle(); showGatherCard(got,n,rare,care); });
+  sfx.harvest(); showGatherCard(got,n,rare,care); });
 $('#bWater').addEventListener('click',e=>{ pressFx(e.currentTarget); const g=state.garden, st=stageOf(Date.now());
   if(g.phase==='ready'){ sfx.click(); toast('草花は、育ちきっています。採取できます'); return; }
   if(g.phase==='watered'){ sfx.click(); toast(st==='empty'?'もう、水をあげました。あと'+minsLeft()+'で、芽が出ます':'もう、水をあげました。育ちきるのは、明日です',3200); return; }
   g.phase='watered'; g.wateredAt=Date.now(); commit(); tickGarden(false);
   const f=gfx(), w=gp().water; for(let i=0;i<8;i++) setTimeout(()=>{ const p=w(i); f.burst(p[0],p[1],'water'); },i*150);
-  sfx.sparkle(); toast('水やり — 水をあげました。'+(DATA.garden.growDelaySec/60)+'分ほどで、芽が出ます。育ちきるのは、明日です',4200); });
+  sfx.water(); toast('水やり — 水をあげました。'+(DATA.garden.growDelaySec/60)+'分ほどで、芽が出ます。育ちきるのは、明日です',4200); });
 $('#bCare').addEventListener('click',e=>{ pressFx(e.currentTarget); const g=state.garden, today=jstDay(Date.now());
   if(g.careDay===today){ sfx.click(); toast('お手入れは、今日は、もうしました。また明日'); return; }
   g.careDay=today; g.careBoost=true; commit(); const f=gfx(); gp().care.forEach(p=>f.burst(p[0],p[1],'gold'));
@@ -1315,7 +1330,7 @@ $('#dDay').addEventListener('click',()=>{ if(state.garden.phase==='watered'){ st
 $('#dEmpty').addEventListener('click',()=>{ state.garden.phase='empty'; state.garden.wateredAt=0; state.garden.careBoost=false; commit(); tickGarden(true); sfx.click(); });
 $('#dMats').addEventListener('click',()=>{ const ids=[]; for(let i=0;i<20;i++){ const m=DATA.materials[Math.floor(Math.random()*DATA.materials.length)]; state.inventory[m.id]=ci((state.inventory[m.id]||0)+3,0,9999); ids.push(m.id); } commit(); renderMats(ids); sfx.sparkle(); });
 function syncSettings(){
-  $('#vBgm').value=Math.round(state.settings.bgmVol*100); $('#vSfx').value=Math.round(state.settings.sfxVol*100);
+  $('#vBgm').value=Math.round(state.settings.bgmVol*100); $('#vSfx').value=Math.round(state.settings.sfxVol*100); $('#vAmb').value=Math.round(state.settings.ambVol*100); $('#hapticEnabled').checked=state.settings.haptics;
   $('#saveStat').textContent='最後の保存：'+fmtTime(state.lastSaved); $('#resetConfirm').classList.remove('show');
 }
 $('#vBgm').addEventListener('input',e=>{ state.settings.bgmVol=e.target.value/100; sfx.applyVolumes(); commit(); });
@@ -1355,6 +1370,20 @@ $('#xIn').addEventListener('click',()=>{
   }catch(e){ xMsg('読み込めませんでした。文字が、途中で切れていたり、まちがっていたりするようです。', true); }
   sfx.click(); });
 $('#xApply').addEventListener('click',()=>{ if(!pendingImport) return; applyLoadedState(pendingImport); pendingImport=null; save(); $('#xApplyRow').style.display='none'; xMsg('引き継ぎました。'); sfx.sparkle(); toast('セーブを読み込みました',2600); });
+
+
+/* Small press, soft release. No delayed sound, no double animation. */
+const feedbackSelector='button:not(:disabled)';
+function feedback(el){
+  if(!el||el.disabled)return;
+  if(!reduced&&el.animate){el.getAnimations().forEach(a=>{if(a.id==='soft-press')a.cancel();});const a=el.animate([{scale:'1'},{scale:'.965',offset:.35},{scale:'1'}],{duration:185,easing:'cubic-bezier(.2,.7,.3,1)'});a.id='soft-press';}
+  if(state.settings.haptics&&navigator.vibrate){try{navigator.vibrate(7);}catch(_){}}
+}
+document.addEventListener('pointerdown',e=>{const b=e.target.closest(feedbackSelector);if(b&&e.isPrimary&&e.button===0){sfx.init();sfx.resume();feedback(b);}},{passive:true});
+document.addEventListener('keydown',e=>{if(!e.repeat&&(e.key==='Enter'||e.key===' ')){const b=e.target.closest(feedbackSelector);if(b){sfx.init();sfx.resume();feedback(b);}}});
+document.addEventListener('click',e=>{const b=e.target.closest(feedbackSelector);if(b&&b.matches('[data-close],.x'))sfx.soft();});
+$('#vAmb').addEventListener('input',e=>{state.settings.ambVol=e.target.value/100;sfx.applyVolumes();commit();});
+$('#hapticEnabled').addEventListener('change',e=>{state.settings.haptics=e.target.checked;commit();if(e.target.checked)feedback(e.target);});
 
 /* first user gesture unlocks audio even if START was not used (e.g. BGM icon) */
 ['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>{ if(sfx.ready) sfx.resume(); },{passive:true}));
