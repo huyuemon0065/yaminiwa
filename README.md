@@ -4,6 +4,10 @@
 
 **[ゲームを遊ぶ](https://yaminiwa-play-garden.cometauk8.chatgpt.site/test/)** · [制作担当とAI使用範囲](AUTHORSHIP.md) · [設計と改善](DESIGN.md) · [プレイテスト](PLAYTEST.md) · [素材クレジット](CREDITS.md)
 
+> **⚠️ iPhone・iPadをご利用の方へ**
+>
+> **現在、iPhone・iPadでは正常に起動しない問題があります。**
+
 <p><img src="sales-restored-v2.28.2.jpg" alt="v2.28.2の接客画面：注文と条件を読み、3本並んだ薬から選ぶ" width="270"> <img src="next-morning.jpg" alt="実プレイ：就寝を終えた2日目朝の自室" width="270"></p>
 
 *360×740相当のブラウザ確認から切り出した実画面。接客はv2.28.2の確認用データ、自室は初日から翌朝まで進めたプレイ記録です。生成した画面案ではありません。*
