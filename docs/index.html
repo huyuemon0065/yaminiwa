@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101624">
+<title>クリスマスカード工房｜闇庭</title>
+<style>
+:root{color-scheme:dark;--gold:#edd1a1;--ivory:#fbf1de;--ink:#101624;--line:#6d6c70;--muted:#b9c6dc;font-family:"Hiragino Sans","Yu Gothic",Meiryo,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;min-height:100svh;color:var(--ivory);background:radial-gradient(ellipse at 73% 41%,#263853 0,#161f31 42%,#0c111c 84%)}
+[hidden]{display:none!important}
+.masthead{max-width:1370px;margin:auto;padding:23px clamp(20px,5vw,72px) 15px;border-bottom:1px solid #b5a77b2d}
+.masthead a{color:var(--gold);text-decoration:none;letter-spacing:.12em;font:500 20px "Yu Mincho",Georgia,serif}
+.masthead span{font:400 13px "Yu Gothic",sans-serif;color:var(--muted);margin-left:12px;letter-spacing:.06em}
+.layout{display:grid;grid-template-columns:minmax(310px,.8fr) minmax(0,1.53fr);width:min(1370px,100%);margin:auto;padding:clamp(22px,5vw,72px);align-items:start;gap:clamp(22px,5vw,90px)}
+.letter{min-width:0}
+h1{font-family:"Hiragino Mincho ProN","Yu Mincho",Georgia,serif;font-weight:500;font-size:clamp(27px,3.2vw,44px);line-height:1.27;letter-spacing:.035em;margin:0 0 23px}
+fieldset{margin:0 0 22px;padding:0;border:0;min-width:0}
+legend{padding:0;margin:0 0 9px}
+label,legend{font-size:14px;line-height:1.6}
+label small{font-size:11px;color:var(--muted);margin-left:3px}
+.templates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.templates label{position:relative;cursor:pointer;min-width:0}
+.templates input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.choice{display:block;min-height:100%;border:1px solid #62657a;border-radius:7px;overflow:hidden;text-align:center;background:#141c2bd9;font-size:clamp(11px,1.05vw,13px);padding:0 3px 7px;line-height:1.35}
+.choice img{display:block;width:calc(100% + 6px);margin:0 -3px 7px;aspect-ratio:1.46;object-fit:cover;background:#182137}
+.templates input:checked+.choice{border-color:var(--gold);background:#343041;color:#fff6e7;box-shadow:0 0 0 1px #d5ab6d6b}
+.templates input:focus-visible+.choice,input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible,canvas:focus-visible{outline:2px solid #fff3c5;outline-offset:3px}
+.names{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-bottom:13px}
+.names label,.message-label{display:block}
+input:not([type=radio]),textarea{display:block;width:100%;min-width:0;margin-top:4px;font:inherit;font-size:16px;color:var(--ivory);padding:9px 10px;border-radius:5px;border:1px solid #62657a;background:#121b2c}
+textarea{resize:vertical;min-height:84px}
+button{cursor:pointer;min-height:43px;font:inherit;font-size:14px;border-radius:5px;padding:0 15px;transition:background .2s}
+.primary{background:#edd1a1;color:#251b16;border:1px solid #edd1a1;font-weight:700}
+.primary:hover{background:#ffe4b1}
+.quiet{background:#172235;color:#f4d7a1;border:1px solid #867456}
+.quiet:hover{background:#29354b}
+.actions,.send-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.actions{justify-content:center}.send-actions{margin-top:12px}.reset{font-size:23px;min-width:43px}
+#link-panel{margin-top:18px;padding:12px;border:1px solid #7f735d88;border-radius:6px}
+#gift-link{font-size:13px}
+.link-note,.hint,#status{font-size:12px;color:var(--muted);line-height:1.5}
+.link-note{margin-bottom:0}
+#status{min-height:1.5em;margin-top:10px}
+.hint{text-align:center;margin:8px 0}
+.scene-frame{height:clamp(350px,57svh,620px);margin:-20px -15px 0}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab;border-radius:15px;outline-offset:-4px}
+canvas:active{cursor:grabbing}
+.greeting{max-width:500px;margin:16px auto 0;text-align:center;padding:12px 18px;border-top:1px solid #f6c88d55;line-height:1.8;overflow-wrap:anywhere}
+.greeting p{margin:0;white-space:pre-wrap}.greeting p+p{margin-top:8px;color:var(--gold);font-size:13px}
+.to-line{font:500 17px Georgia,serif;color:var(--gold);overflow-wrap:anywhere}
+#recipient>p:not(.to-line){color:var(--muted)}
+.make-link{color:var(--gold);display:inline-block;margin-top:12px;text-underline-offset:5px}
+@media(max-width:760px){.layout{grid-template-columns:1fr;gap:24px;padding:23px 18px 30px}.masthead{padding:14px 18px}.scene-frame{height:clamp(285px,53svh,490px);margin:0 -12px}.stage{border-top:1px solid #b5a77b2d}.recipient-view .stage{order:-1;border-top:0}.recipient-view .letter{padding-top:0}.recipient-view .scene-frame{margin-top:-10px}h1{margin-bottom:15px}.choice{font-size:12px}}
+
+</style>
+
+
+</head>
+<body>
+<header class="masthead"><a href="./">闇庭 <span>クリスマスカード工房</span></a></header>
+<main class="layout">
+  <section class="letter" aria-labelledby="title">
+    <div id="editor">
+      <h1 id="title">クリスマスカードを贈る</h1>
+      <form id="gift-form" autocomplete="off">
+        <fieldset><legend>カードを選ぶ</legend>
+          <div class="templates">
+            <label><input type="radio" name="template" value="cafe" checked><span class="choice"><img data-card-cover="cafe" alt="">雪灯りの喫茶店</span></label>
+            <label><input type="radio" name="template" value="tree"><span class="choice"><img data-card-cover="tree" alt="">星灯りのツリー</span></label>
+            <label><input type="radio" name="template" value="moon"><span class="choice"><img data-card-cover="moon" alt="">月とうさぎの庭</span></label>
+          </div>
+        </fieldset>
+        <div class="names">
+          <label>宛名 <small>任意</small><input name="to" autocomplete="off" maxlength="32" placeholder="相手のニックネーム"></label>
+          <label>差出人のニックネーム <small>任意</small><input name="card-alias" autocomplete="off" maxlength="32" placeholder="空欄でも贈れます"></label>
+        </div>
+        <label class="message-label">メッセージ<textarea name="note" maxlength="220" rows="4" required placeholder="メリークリスマス！"></textarea></label>
+        <div class="send-actions">
+          <button class="primary" type="submit">贈るリンクを作る</button>
+        </div>
+        <div id="link-panel" hidden>
+          <label for="gift-link">このカードのリンク</label>
+          <input id="gift-link" readonly>
+          <div class="send-actions"><button id="copy" type="button" class="quiet">リンクをコピー</button><button id="share" type="button" class="quiet" hidden>共有する</button></div>
+          <p class="link-note">リンクを知っている人はメッセージも読めます。</p>
+        </div>
+      </form>
+    </div>
+    <div id="recipient" hidden>
+      <p class="to-line" id="gift-to"></p>
+      <h1 id="received-title">冬の贈り物</h1>
+      <p>カードを開いて、贈られたメッセージを読もう。</p>
+      <a class="make-link" href="./">自分もカードを作る</a>
+    </div>
+    <div id="status" role="status" aria-live="polite"></div>
+  </section>
+  <section class="stage" aria-label="回して見られるクリスマスカード">
+    <div class="scene-frame"><canvas id="scene" tabindex="0" aria-label="クリスマスカード。タップまたは Enter で開閉、ドラッグまたは矢印キーで回転。"></canvas></div>
+    <div class="actions">
+      <button id="toggle" class="primary" type="button" aria-pressed="false">カードを開く</button>
+      <button id="reset" class="quiet reset" type="button" aria-label="視点を戻す" title="視点を戻す">↶</button>
+    </div>
+    <p class="hint">ドラッグで回転 · 矢印キーでも操作できます</p>
+    <div id="greeting" class="greeting" hidden><p id="greeting-note"></p><p id="greeting-from"></p></div>
+  </section>
+</main>
+<script src="asset-cafe.js"></script>
+<script src="asset-tree.js"></script>
+<script src="asset-moon.js"></script>
+<script>
+'use strict';
+
+const cardTemplates = Object.freeze({
+  cafe: { name:'雪灯りの喫茶店', cover:cardArt_cafe, inside:'#2e3a56', foil:'#edc588' },
+  tree: { name:'星灯りのツリー', cover:cardArt_tree, inside:'#1b4141', foil:'#f2ce80' },
+  moon: { name:'月とうさぎの庭', cover:cardArt_moon, inside:'#3e3155', foil:'#e9d3f5' }
+});
+const fields = {to:32, from:32, note:220};
+const giftForm = document.querySelector('#gift-form');
+const giftLink = document.querySelector('#gift-link');
+const linkPanel = document.querySelector('#link-panel');
+const giftStatus = document.querySelector('#status');
+const defaultNote = 'あたたかな灯りが、あなたの冬を照らしますように。';
+const shareButton = document.querySelector('#share');
+
+function normalizeGift(raw) {
+  if (!raw || raw.v !== 1 || !Object.hasOwn(cardTemplates, raw.template)) return null;
+  const result = {v:1, template:raw.template};
+  for (const [key,max] of Object.entries(fields)) {
+    if (typeof raw[key] !== 'string' || raw[key].length > max) return null;
+    result[key] = raw[key].replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'').trim();
+  }
+  return result.note ? result : null;
+}
+function decodeGift(hash) {
+  if (!hash.startsWith('#gift=') || hash.length > 1900) return null;
+  const encoded = hash.slice(6);
+  if (!/^[A-Za-z0-9_-]+$/.test(encoded)) return null;
+  try {
+    const binary = atob(encoded.replaceAll('-','+').replaceAll('_','/'));
+    const json = new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(binary,c=>c.charCodeAt(0)));
+    return normalizeGift(JSON.parse(json));
+  } catch {
+    return null;
+  }
+}
+function makeGiftLink(gift) {
+  const data = new TextEncoder().encode(JSON.stringify(gift));
+  const encoded = btoa(String.fromCharCode(...data)).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
+  const url = new URL('./',location.href);
+  url.hash = 'gift='+encoded;
+  return url.href;
+}
+function renderMessage(note, from) {
+  document.querySelector('#greeting-note').textContent = note || defaultNote;
+  document.querySelector('#greeting-from').textContent = from ? '― '+from : 'Merry Christmas';
+}
+const receivedGift = decodeGift(location.hash);
+let chosenTemplate = receivedGift?.template || 'cafe';
+
+if (receivedGift) {
+  document.documentElement.classList.add('recipient-view');
+  document.querySelector('.letter').setAttribute('aria-labelledby','received-title');
+  document.querySelector('#editor').hidden = true;
+  document.querySelector('#recipient').hidden = false;
+  document.querySelector('#received-title').textContent = cardTemplates[chosenTemplate].name;
+  document.querySelector('#gift-to').textContent = receivedGift.to ? receivedGift.to+'へ' : '';
+  renderMessage(receivedGift.note, receivedGift.from);
+} else {
+  renderMessage('', '');
+  if (location.hash.startsWith('#gift=')) giftStatus.textContent = 'このカードのリンクを読み込めませんでした。';
+}
+
+giftForm.addEventListener('input',()=>{
+  linkPanel.hidden = true;
+  giftLink.value = '';
+  giftStatus.textContent = '';
+  renderMessage(giftForm.elements.note.value.trim(), giftForm.elements.namedItem('card-alias').value.trim());
+  const next = giftForm.elements.template.value;
+  if (next !== chosenTemplate && Object.hasOwn(cardTemplates,next)) {
+    chosenTemplate = next;
+    document.dispatchEvent(new Event('card-template-change'));
+  }
+});
+giftForm.addEventListener('submit',event=>{
+  event.preventDefault();
+  const form = new FormData(giftForm);
+  const gift = normalizeGift({v:1, template:form.get('template'), to:form.get('to'), from:form.get('card-alias'), note:form.get('note')});
+  if (!gift) {
+    giftStatus.textContent = 'メッセージを書いてからリンクを作ってください。';
+    giftForm.elements.note.focus();
+    return;
+  }
+  giftLink.value = makeGiftLink(gift);
+  linkPanel.hidden = false;
+  shareButton.hidden = typeof navigator.share !== 'function';
+  giftStatus.textContent = 'リンクができました。コピーしてDiscordのDMなどで贈れます。';
+  giftLink.focus();
+  giftLink.select();
+});
+document.querySelector('#copy').addEventListener('click',async()=>{
+  if (!giftLink.value) return;
+  try {
+    await navigator.clipboard.writeText(giftLink.value);
+    giftStatus.textContent = 'リンクをコピーしました。';
+  } catch {
+    giftLink.focus();
+    giftLink.select();
+    giftStatus.textContent = '選択したリンクを手動でコピーしてください。';
+  }
+});
+shareButton.addEventListener('click',async()=>{
+  if (!giftLink.value) return;
+  try {
+    await navigator.share({title:'闇庭のクリスマスカード',url:giftLink.value});
+  } catch (error) {
+    if (error.name !== 'AbortError') giftStatus.textContent = '共有できませんでした。リンクをコピーして送れます。';
+  }
+});
+window.addEventListener('hashchange',()=>location.reload());
+
+for (const preview of document.querySelectorAll("[data-card-cover]")) preview.src = cardTemplates[preview.dataset.cardCover].cover;
+
+</script>
+<script>
+'use strict';
+const canvas = document.querySelector('#scene');
+const ctx = canvas.getContext('2d');
+const toggle = document.querySelector('#toggle');
+const greeting = document.querySelector('#greeting');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const cover = new Image();
+
+const W = 7.7, D = 5.35;
+const ground = [], objects = [], lights = [];
+const paper = ['#c9a67c','#a78769','#f6dfb6','#8d6c54','#b39572','#edd2a7'];
+const wood = ['#69423f','#593644','#c48c6c','#3a2537','#614054','#95675b'];
+const snow = ['#e3eaf1','#aabbd5','#fff4e5','#8599bc','#c9d4ea','#f2f4fa'];
+const navy = ['#1c2945','#15233c','#303c5c','#0e192d','#253450','#142138'];
+const gold = ['#83582d','#956e40','#e6bc76','#684823','#b58748','#caa165'];
+const roof = ['#465375','#35425f','#607298','#26364e','#374968','#536384'];
+
+function face(dest, pts, color, outline) {
+  dest.push({pts,color,outline});
+}
+function box(dest,x,y,z,w,h,d,pal) {
+  const a=[x-w/2,y,z-d/2], b=[x+w/2,y,z-d/2], c=[x+w/2,y,z+d/2], e=[x-w/2,y,z+d/2];
+  const A=[a[0],y+h,a[2]], B=[b[0],y+h,b[2]], C=[c[0],y+h,c[2]], E=[e[0],y+h,e[2]];
+  [[e,c,C,E],[b,c,C,B],[A,B,C,E],[a,b,B,A],[a,e,E,A],[a,b,c,e]].forEach((pts,i)=>face(dest,pts,pal[i]));
+}
+function gable(x,y,z,w,d,r) {
+  const l=x-w/2, u=x+w/2, near=z+d/2, far=z-d/2;
+  face(objects,[[l,y,near],[u,y,near],[x,y+r,near]],wood[0],'#493447');
+  face(objects,[[l,y,far],[u,y,far],[x,y+r,far]],wood[3]);
+  for(const [edge, shade] of [[l,roof[2]],[u,roof[1]]]){
+    const ridge=y+r+.075, e=edge<x?edge-.13:edge+.13;
+    face(objects,[[x,ridge,far-.12],[e,y+.03,far-.12],[e,y+.03,near+.15],[x,ridge,near+.15]],shade);
+    face(objects,[[x,ridge+.045,far-.13],[e,y+.09,far-.13],[e,y+.09,near+.16],[x,ridge+.045,near+.16]],edge<x?snow[2]:snow[1],'#afbdd2');
+    for(let i=1;i<5;i++){
+      const t=i/5, k=x+(e-x)*t, yy=ridge+.048+(y+.09-ridge-.048)*t;
+      face(objects,[[k,yy,far],[k,yy,near+.15],[k+.034,yy+.012,near+.15],[k+.034,yy+.012,far]],'#ffffff35');
+    }
+  }
+}
+function windowAt(x,y,z,w,h){
+  box(objects,x,y,z,w+.16,h+.14,.14,wood);
+  face(objects,[[x-w/2,y+.085,z+.075],[x+w/2,y+.085,z+.075],[x+w/2,y+h+.075,z+.075],[x-w/2,y+h+.075,z+.075]],'#ffcb78','#e7a962');
+  box(objects,x,y+.08,z+.09,.035,h,.022,wood);
+  box(objects,x,y+h*.58,z+.09,w,.038,.02,wood);
+  box(objects,x,y+.015,z+.085,w+.13,.075,.19,snow);
+  lights.push([x,y+h*.56,z+.16,.77]);
+}
+function pine(x,z,h,tint=0){
+  box(objects,x,.03,z,.13,h*.29,.15,wood);
+  const colors=tint?['#43685d','#304e4f','#6f9480']:['#355950','#264745','#548173'];
+  for(let i=0;i<4;i++){
+    const bottom=.2+h*i*.18, peak=bottom+h*.45, radius=h*(.29-i*.052);
+    const points=Array.from({length:7},(_,k)=>[x+Math.cos(k*Math.PI*2/7)*radius,bottom,z+Math.sin(k*Math.PI*2/7)*radius]);
+    for(let k=0;k<7;k++){
+      const a=points[k],b=points[(k+1)%7], tip=[x,peak,z];
+      face(objects,[a,b,tip],colors[k%3],'#192d3d55');
+      const t=.32+(k%3)*.095;
+      face(objects,[tip,[a[0]+(x-a[0])*t,bottom+(peak-bottom)*t+.014,a[2]+(z-a[2])*t],[b[0]+(x-b[0])*t,bottom+(peak-bottom)*t+.014,b[2]+(z-b[2])*t]],snow[k%3]);
+    }
+  }
+}
+function lantern(x,z,h,post=true){
+  if(post) box(objects,x,.06,z,.08,h,.08,wood);
+  const glass=['#ffd690','#eab268','#ffeabe','#b37e55','#ffc37c','#e5ad63'];
+  box(objects,x,h,z,.18,.25,.18,glass);
+  box(objects,x,h+.25,z,.26,.055,.26,wood);
+  box(objects,x,h-.035,z,.24,.055,.24,wood);
+  lights.push([x,h+.13,z+.12,.76]);
+}
+function makeCafe(){
+  box(ground,0,0,2.685,7.34,.08,5.0,snow);
+  const pavers=['#d8c7ba','#b9aaab','#b8b1b6','#d4b9a6','#ece1d8'];
+  for(let i=0;i<8;i++){
+    const z=2.7+i*.288;
+    for(let k=0;k<4;k++){
+      const x=(k-1.5)*.37+Math.sin(i*.57)*.37;
+      face(ground,[[x-.17,.084,z-.12],[x+.17,.084,z-.123],[x+.144,.084,z+.10],[x-.156,.084,z+.111]],pavers[(i*3+k)%5],'#8e889564');
+    }
+  }
+  box(objects,-.21,.075,1.67,3.45,1.75,1.64,paper);
+  box(objects,-.21,1.77,1.67,3.51,.10,1.72,wood);
+  gable(-.21,1.85,1.67,3.65,1.75,1.21);
+  box(objects,.98,2.53,1.2,.31,.81,.29,wood);
+  box(objects,.98,3.32,1.2,.39,.09,.37,snow);
+  box(objects,1.94,.073,1.78,1.02,1.15,1.17,paper);
+  gable(1.94,1.2,1.78,1.17,1.25,.61);
+  windowAt(1.96,.49,2.379,.40,.34);
+  const front=2.513;
+  for(const x of [-1.91,-.98,.53,1.47]) box(objects,x,.1,front,.095,1.68,.13,wood);
+  box(objects,-.215,.98,front,3.43,.10,.13,wood);
+  windowAt(-1.45,.44,front+.033,.62,.44);
+  windowAt(.99,.44,front+.033,.62,.44);
+  windowAt(-.24,2.06,2.575,.40,.32);
+  box(objects,-.23,.09,front+.025,.77,1.06,.13,wood);
+  windowAt(-.23,.57,front+.114,.35,.32);
+  box(objects,.025,.48,front+.12,.045,.05,.04,gold);
+  box(objects,-.23,.09,2.91,.95,.14,.54,paper);
+  box(objects,-.23,.087,3.12,1.08,.065,.37,paper);
+  const awning = [-1.91,-1.63,-1.35,-1.07,-.79,-.51,-.23,.05,.33,.61,.89,1.17,1.45];
+  for(let i=0;i<awning.length-1;i++){
+    const x=awning[i], x2=awning[i+1], col=i%2?'#bf7857':'#efcf9d';
+    face(objects,[[x,1.30,2.58],[x2,1.30,2.58],[x2,1.05,3.10],[x,1.05,3.10]],col,'#7d554865');
+    face(objects,[[x,1.05,3.10],[x2,1.05,3.10],[x2-.016,.95,3.10],[x+.016,.95,3.10]],i%2?'#915748':'#c7a484');
+  }
+  face(objects,[[-.665,1.53,front+.114],[.206,1.53,front+.114],[.206,1.70,front+.114],[-.665,1.70,front+.114]],'#3a3040','#c89a63');
+  objects.push({pts:[[-.63,1.55,front+.117],[.171,1.55,front+.117],[.171,1.68,front+.117],[-.63,1.68,front+.117]],sign:true});
+  lantern(-.76,2.64,1.20,false);
+  lantern(.30,2.64,1.20,false);
+  lantern(-1.10,4.19,1.07);
+  lantern(1.56,4.35,.9);
+  for(const [x,z,h] of [[-2.93,1.0,2.61],[2.97,1.15,2.4],[-2.64,3.05,1.77],[2.73,3.29,1.88],[-3.05,4.62,1.32],[3.05,4.55,1.27]]) pine(x,z,h,x>0);
+  for(const x of [-2.49,2.24]) {
+    for(let i=0;i<5;i++){
+      const z=3.51+i*.29;
+      box(objects,x,.08,z,.07,.32,.085,wood);
+      for(const h of [.16,.29]) box(objects,x,h,z+.14,.043,.047,.295,wood);
+    }
+  }
+  const t=[2.37,3.91];
+  box(objects,t[0],.082,t[1],.36,.28,.34,gold);
+  box(objects,t[0],.372,t[1],.36,.052,.34,wood);
+  box(objects,t[0]-.39,.083,t[1]+.22,.26,.20,.29,navy);
+  box(objects,t[0]-.39,.29,t[1]+.22,.26,.032,.29,gold);
+}
+function gem(x,y,z,r,color){
+  const equator=[[x-r,y,z],[x,y,z+r],[x+r,y,z],[x,y,z-r]];
+  for(let i=0;i<4;i++){
+    const edge=[equator[i],equator[(i+1)%4]];
+    face(objects,[[x,y+r,z],...edge],i%2?color:color+'da');
+    face(objects,[[x,y-r,z],...edge],color);
+  }
+}
+function wrappedGift(x,z,w,h,pal){
+  box(objects,x,.08,z,w,h,w,pal);
+  box(objects,x,.085+h,z,w+.045,.045,w+.045,pal);
+  box(objects,x,.137+h,z,.06,.018,w+.045,gold);
+  box(objects,x,.137+h,z,w+.045,.018,.058,gold);
+  gem(x,.20+h,z,.085,'#e7b665');
+}
+function makeTree(){
+  box(ground,0,0,2.68,7.34,.08,5,snow);
+  box(ground,0,.077,2.53,4.15,.012,2.42,['#bcae9c','#afaaa8','#d8cabb','#9d8d7e','#c7b8ad','#e6dbcc']);
+  pine(0,2.3,3.18,1);
+  for(let i=0;i<30;i++){
+    const turn=i*2.39996, y=.59+i*.078, r=.92-(y-.59)*.285;
+    const x=Math.cos(turn)*r,z=2.3+Math.sin(turn)*r;
+    const color=['#f7ce77','#df737b','#dceafa'][i%3];
+    gem(x,y,z,.085,color);
+    if(i%4===0)lights.push([x,y,z,.29]);
+  }
+  gem(0,3.36,2.3,.19,'#ffdb88');
+  lights.push([0,3.36,2.3,.68]);
+  const red=['#934653','#6e3247','#c17a7f','#63324b','#7d374e','#b55d68'];
+  for(const [x,z,w,h,p] of [[-1.28,2.74,.59,.42,red],[1.16,3.14,.66,.44,navy],[.57,3.57,.41,.25,gold],[-.51,3.66,.41,.29,navy],[1.21,2.07,.47,.32,red]])wrappedGift(x,z,w,h,p);
+  for(const [x,z,h] of [[-2.83,1.36,2],[2.77,1.32,1.97],[-2.66,3.93,1.33],[2.68,3.98,1.46]])pine(x,z,h);
+  lantern(-1.91,3.6,.85);lantern(1.88,3.6,.85);
+}
+function makeMoon(){
+  box(ground,0,0,2.68,7.34,.08,5,snow);
+  box(ground,0,.074,2.99,3.74,.021,2.1,['#789ec0','#6d8fb9','#92bdd6','#829bb9','#8fa7c7','#849bb4']);
+  for(let i=0;i<7;i++){
+    const a=(i-3)*.48,z=3.46-Math.abs(i-3)*.13;
+    box(objects,a,.087,z,.39,.063,.33,snow);
+  }
+  const cx=.07,cy=2.01,z=1.77,r=1.12;
+  const arc=(angle,inside)=>[cx+Math.cos(angle)*r*(inside?.61:1)+(inside?.32:0),cy+Math.sin(angle)*r*(inside?.71:1)];
+  for(let i=0;i<20;i++){
+    const a=.75+i*.241,b=a+.241;
+    const pair=[arc(a,false),arc(b,false),arc(b,true),arc(a,true)];
+    face(objects,pair.map(([x,y])=>[x,y,z]),'#e7c992');
+    face(objects,pair.map(([x,y])=>[x,y,z+.12]),i%2?'#ffedbd':'#f5dd9f');
+    const [u,v]=pair;
+    face(objects,[[...u,z],[...v,z],[...v,z+.12],[...u,z+.12]],'#c19966');
+  }
+  box(objects,.05,.08,z,.23,.88,.18,['#9f90a8','#786e8e','#a99eb7','#6c6687','#8d7d9f','#9987a1']);
+  lights.push([-.53,2.58,z+.12,.8]);
+  for(const [x,y,h] of [[1.05,2.98,.11],[1.52,2.35,.085],[-1.54,2.87,.094],[1.92,2.76,.06]])gem(x,y,z+.143,h,'#fff2c8');
+  for(const [x,z,h] of [[-2.79,1.32,2.48],[2.84,1.47,2.23],[-2.44,3.42,1.58],[2.57,3.48,1.67]])pine(x,z,h,1);
+  lantern(-1.68,3.85,.63);lantern(1.86,3.91,.68);
+  for(const [x,z] of [[-.62,3.95],[.71,2.75]]){
+    box(objects,x,.09,z,.27,.29,.26,snow);
+    box(objects,x,.31,z+.07,.21,.17,.18,snow);
+    for(const v of [-.055,.051])box(objects,x+v,.464,z+.066,.058,.179,.056,snow);
+    box(objects,x,.39,z+.166,.027,.027,.012,wood);
+  }
+}
+const modelBuilders={cafe:makeCafe,tree:makeTree,moon:makeMoon};
+function chooseModel(){
+  ground.length=objects.length=lights.length=0;
+  cover.src=cardTemplates[chosenTemplate].cover;
+  modelBuilders[chosenTemplate]();
+}
+chooseModel();
+
+let width=0,height=0,dpr=1;
+let openness=0, target=0, yaw=-.32, pitch=.67;
+let last=performance.now(), frameId=0;
+let drag=null, time=0, focal=0, py=0, zoom=1, centerZ=2;
+const particles=Array.from({length:102},(_,i)=>({x:(i*.61803399)%1,y:(i*.438579)%1,r: .48+(i*.7413%1)*1.5,s:19+i%9*4,tw:i*.82}));
+function project([x,y,z]){
+  z-=centerZ;
+  const cx=Math.cos(yaw)*x+Math.sin(yaw)*z, cz=Math.cos(yaw)*z-Math.sin(yaw)*x;
+  const cy=y*Math.cos(pitch)-cz*Math.sin(pitch), dep=cz*Math.cos(pitch)+y*Math.sin(pitch);
+  const scale=zoom*focal/(focal-dep*.23);
+  return [width*.5+cx*scale,py-cy*scale,dep];
+}
+function polygon(points){
+  ctx.beginPath();
+  points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+  ctx.closePath();
+}
+function draw(items, transform=p=>p) {
+  const flat=items.map(o=>{
+    const p=o.pts.map(v=>project(transform(v)));
+    return {o,p,d:p.reduce((a,v)=>a+v[2],0)/p.length};
+  }).sort((a,b)=>a.d-b.d);
+  for(const {o,p} of flat){
+    polygon(p);
+    if(o.sign){
+      const c=centroid(p);
+      ctx.save();ctx.clip();ctx.font='600 '+Math.max(5,zoom*.102)+'px serif';ctx.fillStyle='#ffdb98';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('闇庭喫茶店',c[0],c[1]);ctx.restore();continue;
+    }
+    ctx.fillStyle=o.color;ctx.fill();
+    ctx.strokeStyle=o.outline||o.color;ctx.lineWidth=o.outline?.length>0?.55:.38;ctx.stroke();
+  }
+}
+function centroid(q){return [q.reduce((s,p)=>s+p[0],0)/q.length,q.reduce((s,p)=>s+p[1],0)/q.length];}
+function panel(angle, baseY){
+  const theme=cardTemplates[chosenTemplate];
+  const width=W/2;
+  const pos=(x,d,offset=0)=>[x,baseY+d*Math.sin(angle)+Math.cos(angle)*offset,d*Math.cos(angle)-Math.sin(angle)*offset];
+  const corners=(x1,x2,z1,z2,offset)=>[pos(x1,z2,offset),pos(x2,z2,offset),pos(x2,z1,offset),pos(x1,z1,offset)].map(project);
+  const outer=corners(-width,width,0,D,0);
+  const under=corners(-width,width,0,D,-.10);
+  for(const i of [0,1,2,3]){
+    const j=(i+1)%4; polygon([outer[i],outer[j],under[j],under[i]]);
+    ctx.fillStyle=i===2?'#725941':'#a18154';ctx.fill();
+  }
+  const a=outer[0], b=outer[1], c=outer[3];
+  const facing=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+  const outside=facing<0;
+  polygon(outside?outer:under);
+  ctx.fillStyle=outside?theme.inside:'#9b775e';ctx.fill();
+  if(outside&&cover.complete&&cover.naturalWidth){
+    ctx.save();ctx.clip();
+    const top=outer[3], right=outer[2], down=outer[0];
+    ctx.transform((right[0]-top[0])/cover.width,(right[1]-top[1])/cover.width,(down[0]-top[0])/cover.height,(down[1]-top[1])/cover.height,top[0],top[1]);
+    ctx.drawImage(cover,0,0);ctx.restore();
+  }else{
+    const border=corners(-width+.19,width-.19,.21,D-.21,outside?.006:-.108);
+    polygon(border);ctx.fillStyle=theme.inside;ctx.fill();ctx.strokeStyle=theme.foil;ctx.lineWidth=1.2;ctx.stroke();
+    if(outside){drawCoverMark(centroid(border), projectedWidth(border));}
+    else{
+      const p=centroid(border);
+      ctx.save();ctx.textAlign='center';ctx.fillStyle='#efd4a6';ctx.font='italic '+Math.max(12,zoom*.46)+'px Georgia';ctx.fillText('Merry Christmas',p[0],p[1]-8);
+      ctx.font='10px Georgia';ctx.fillStyle='#eed2a4bb';ctx.fillText('Y A M I N I W A',p[0],p[1]+12);ctx.restore();
+    }
+  }
+}
+function projectedWidth(p){return Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);}
+function drawCoverMark(p,w){
+  ctx.save();ctx.translate(...p);ctx.strokeStyle='#e2c089';ctx.fillStyle='#f0cc91';ctx.lineWidth=1.2;
+  const size=w*.105;
+  for(let i=0;i<6;i++){ctx.rotate(Math.PI/3);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-size);ctx.moveTo(-size*.19,-size*.68);ctx.lineTo(0,-size*.48);ctx.lineTo(size*.19,-size*.68);ctx.stroke();}
+  ctx.textAlign='center';ctx.font=w*.042+'px Georgia';ctx.fillText('C H R I S T M A S',0,size*1.72);ctx.restore();
+}
+function glow(v,amp){
+  const [x,y]=project(v),r=v[3]*zoom*.61;
+  const g=ctx.createRadialGradient(x,y,0,x,y,r);
+  g.addColorStop(0,'rgba(255,203,130,'+(.43*amp)+')');g.addColorStop(.30,'rgba(255,145,70,'+(.19*amp)+')');g.addColorStop(1,'#ef963200');
+  ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);
+}
+function render(now){
+  frameId=0;
+  const dt=Math.min(.042,Math.max(0,(now-last)/1000));last=now;
+  time+=dt;
+  openness+=(target-openness)*(reduced.matches?1:Math.min(dt*5.9,1));
+  if(Math.abs(target-openness)<.001) openness=target;
+  const ease=openness*openness*(3-2*openness);
+  const lift=Math.min(1,Math.max(0,(openness-.27)/.64));
+  const fluff=lift*lift*(3-2*lift);
+  const angle=ease*1.92;
+  focal=26;zoom=Math.min(width/(8.75+Math.abs(yaw)*1.6),height/(5.9+ease*3.6));
+  centerZ=2.68-ease*.88;
+  py=height*(.515+ease*.14);
+  const viewCorners=[];
+  for(const x of [-W/2-.06,W/2+.06]){
+    viewCorners.push([x,-.19,0],[x,-.19,D],[x,.24,0],[x,.24+D*Math.sin(angle),D*Math.cos(angle)]);
+  }
+  const points=viewCorners.map(project);
+  const ys=points.map(p=>p[1]), xs=points.map(p=>p[0]);
+  const margin=Math.min(24,width*.045);
+  const spanX=2*Math.max(width/2-Math.min(...xs),Math.max(...xs)-width/2);
+  const spanY=Math.max(...ys)-Math.min(...ys);
+  zoom*=Math.min(1,(width-2*margin)/spanX,(height-2*margin)/spanY);
+  const fitted=viewCorners.map(p=>project(p)[1]);
+  py+=height*.50-(Math.max(...fitted)+Math.min(...fitted))/2;
+  ctx.clearRect(0,0,width,height);
+  const halo=ctx.createRadialGradient(width*.50,height*.54,0,width*.50,height*.54,Math.max(width,height)*.47);
+  halo.addColorStop(0,ease>.4?'#5f536642':'#465a7c3e');halo.addColorStop(1,'#151c2b00');
+  ctx.fillStyle=halo;ctx.fillRect(0,0,width,height);
+  const shadow=ctx.createRadialGradient(width*.52,py+zoom*.67,1,width*.52,py+zoom*.67,zoom*4.2);
+  shadow.addColorStop(0,'#0508139c');shadow.addColorStop(1,'#05081300');
+  ctx.save();ctx.translate(0,(py+zoom*.67)*.68);ctx.scale(1,.32);ctx.fillStyle=shadow;ctx.fillRect(0,0,width,height*3.13);ctx.restore();
+  if(openness>.61)panel(angle,.24);
+  const book=[];box(book,0,-.19,D/2,W+.09,.09,D+.05,navy);
+  box(book,0,-.108,D/2,W-.09,.117,D-.095,gold);
+  box(book,0,.004,D/2,W,.035,D,'#21304d #18243b #d5b483 #152137 #1e2b43 #293857'.split(' '));
+  draw(book);
+  if(openness>.14){
+    draw(ground);
+    if(fluff>.004){
+      const fold=([x,y,z])=>[x,.08+(y-.08)*fluff,z-(1-fluff)*y*.78];
+      draw(objects,fold);
+      lights.forEach((v,i)=>glow([...fold(v),v[3]],fluff*(.82+Math.sin(time*2+i)*.13)));
+    }
+  }
+  if(openness<=.61)panel(angle,.24);
+  const motion=reduced.matches?0:time;
+  for(const s of particles){
+    const x=s.x*width+Math.sin(s.tw+motion*.57)*16;
+    const y=(s.y*height+motion*s.s)%height;
+    ctx.beginPath();ctx.arc(x,y,s.r,0,Math.PI*2);
+    ctx.fillStyle='rgba(234,243,255,'+(.13+ease*.22+(s.r-.48)*.125)+')';ctx.fill();
+  }
+  if(!reduced.matches || openness!==target) schedule();
+}
+function schedule(){if(!frameId)frameId=requestAnimationFrame(render);}
+function setTarget(next){
+  target=next;toggle.textContent=next?'カードを閉じる':'カードを開く';
+  toggle.setAttribute('aria-pressed',String(Boolean(next)));
+  greeting.hidden=!next;schedule();
+}
+function resize(){
+  const rect=canvas.getBoundingClientRect();
+  width=rect.width;height=rect.height;dpr=Math.min(devicePixelRatio||1,2);
+  canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);schedule();
+}
+function move(dx,dy){yaw=Math.max(-.9,Math.min(.9,yaw+dx));pitch=Math.max(.41,Math.min(1.08,pitch+dy));schedule();}
+toggle.addEventListener('click',()=>setTarget(1-target));
+document.querySelector('#reset').addEventListener('click',()=>{yaw=-.32;pitch=.67;schedule();});
+canvas.addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6)drag.moved=true;
+  if(drag.moved)move((e.clientX-drag.px)*.006,(e.clientY-drag.py)*.003);
+  drag.px=e.clientX;drag.py=e.clientY;
+});
+canvas.addEventListener('pointerup',()=>{if(drag&&!drag.moved)setTarget(1-target);drag=null;});
+canvas.addEventListener('pointercancel',()=>{drag=null;});
+canvas.addEventListener('keydown',e=>{
+  const dirs={ArrowLeft:[-.1,0],ArrowRight:[.1,0],ArrowUp:[0,-.075],ArrowDown:[0,.075]};
+  if(e.key in dirs){e.preventDefault();move(...dirs[e.key]);}
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();setTarget(1-target);}
+});
+new ResizeObserver(resize).observe(canvas);
+cover.addEventListener('load',schedule);
+document.addEventListener('card-template-change',()=>{chooseModel();schedule();});
+reduced.addEventListener('change',schedule);
+resize();
+
+</script>
+</body>
+</html>
